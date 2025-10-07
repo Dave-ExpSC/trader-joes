@@ -4,12 +4,20 @@ import { products } from '../data/sampleData';
 function ProductList({ searchQuery, activeTab, favorites, toggleFavorite, addToCart }) {
   const getFilteredProducts = () => {
     let filteredProducts = products;
-if (searchQuery) {
-  filteredProducts = filteredProducts.filter(p =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-}
-return filteredProducts;
+
+    if (searchQuery) {
+      filteredProducts = filteredProducts.filter(p =>
+        p.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (activeTab === 'favorites') {
+      filteredProducts = filteredProducts.filter(p =>
+        favorites.includes(p.id)
+      );
+    }
+
+    return filteredProducts;
   };
 
   const filteredProducts = getFilteredProducts();
