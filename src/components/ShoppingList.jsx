@@ -1,11 +1,14 @@
 import React from 'react';
 
-function ShoppingList({ cart, removeFromCart }) {
+function ShoppingList({ cart, removeFromCart, clearCart }) {
   const total = cart.reduce((sum, item) => sum + item.price, 0);
 
   const handleCheckout = () => {
     if (cart.length > 0) {
-      alert(`Checkout - Total: $${total.toFixed(2)}\n\nItems:\n${cart.map(item => `${item.name} - $${item.price.toFixed(2)}`).join('\n')}`);
+      if (window.confirm(`Complete checkout for ${total.toFixed(2)}?\n\nThis will clear your cart.`)) {
+        clearCart();
+        alert('Checkout complete! Your cart has been cleared.');
+      }
     }
   };
 

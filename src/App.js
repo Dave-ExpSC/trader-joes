@@ -70,6 +70,10 @@ function App() {
     setCart(prev => prev.filter((_, i) => i !== index));
   };
 
+  const clearCart = () => {
+    setCart([]);
+  };
+
   const handleSearch = () => {
     setActiveTab('all');
   };
@@ -218,6 +222,7 @@ function App() {
       <ShoppingList
         cart={cart}
         removeFromCart={removeFromCart}
+        clearCart={clearCart}
       />
     </div>
   );
