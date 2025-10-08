@@ -211,6 +211,7 @@ function App() {
           toggleFavorite={toggleFavorite}
           addToCart={addToCart}
           deleteProduct={deleteProduct}
+          cart={cart}
         />
       </div>
 

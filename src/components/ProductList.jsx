@@ -1,6 +1,10 @@
 import React from 'react';
 
-function ProductList({ products, searchQuery, activeTab, favorites, toggleFavorite, addToCart, deleteProduct }) {
+function ProductList({ products, searchQuery, activeTab, favorites, toggleFavorite, addToCart, deleteProduct, cart }) {
+  const isInCart = (productId) => {
+    return cart.some(item => item.id === productId);
+  };
+
   const getFilteredProducts = () => {
     let filteredProducts = products;
 
@@ -62,7 +66,7 @@ function ProductList({ products, searchQuery, activeTab, favorites, toggleFavori
                   {favorites.includes(product.id) ? '❤️' : '🤍'}
                 </button>
                 <button
-                  className="btn btn-xs btn-primary"
+                  className={`btn btn-xs ${isInCart(product.id) ? 'btn-in-cart' : 'btn-primary'}`}
                   onClick={() => addToCart(product)}
                 >
                   + Add
