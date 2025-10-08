@@ -46,12 +46,12 @@ function ProductList({ products, searchQuery, activeTab, favorites, toggleFavori
             >
               ✕
             </button>
-            <div className="card-body p-3">
-              <h3 className="font-semibold text-sm mb-1">{product.name}</h3>
-              <div className="text-xl font-bold mb-1 product-price">
+            <div className="card-body">
+              <h3>{product.name}</h3>
+              <div className="product-price">
                 ${product.price.toFixed(2)}
               </div>
-              <div className="text-xs opacity-70 mb-2">{product.category}</div>
+              <div className="text-xs">{product.category}</div>
               <div className="flex gap-2">
                 <button
                   className="btn btn-xs bg-base-300 border-0 text-2xl favorite-btn"
