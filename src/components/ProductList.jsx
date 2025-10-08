@@ -1,7 +1,6 @@
 import React from 'react';
-import { products } from '../data/sampleData';
 
-function ProductList({ searchQuery, activeTab, favorites, toggleFavorite, addToCart }) {
+function ProductList({ products, searchQuery, activeTab, favorites, toggleFavorite, addToCart, deleteProduct }) {
   const getFilteredProducts = () => {
     let filteredProducts = products;
 
@@ -24,32 +23,55 @@ function ProductList({ searchQuery, activeTab, favorites, toggleFavorite, addToC
 
   return (
     <div className="products-grid">
-      {filteredProducts.map(product => (
-        <div key={product.id} className="card bg-base-200 shadow-sm">
-          <div className="card-body p-3">
-            <h3 className="font-semibold text-sm mb-1">{product.name}</h3>
-            <div className="text-xl font-bold mb-1 product-price">
-              ${product.price.toFixed(2)}
-            </div>
-            <div className="text-xs opacity-70 mb-2">{product.category}</div>
-            <div className="flex gap-2">
-              <button
-                className="btn btn-xs bg-base-300 border-0 text-2xl favorite-btn"
-                style={{ color: favorites.includes(product.id) ? '#ff5252' : '#666' }}
-                onClick={() => toggleFavorite(product.id)}
-              >
-                ♥
-              </button>
-              <button
-                className="btn btn-xs btn-primary"
-                onClick={() => addToCart(product)}
-              >
-                + Add
-              </button>
+      {filteredProducts.length === 0 ? (
+        <div style={{ 
+          gridColumn: '1 / -1', 
+          textAlign: 'center', 
+          padding: '3rem', 
+          color: '#999' 
+        }}>
+          {activeTab === 'favorites' 
+            ? 'No favorites yet. Click the ❤️ button on products to add them!'
+            : searchQuery 
+              ? `No products found matching "${searchQuery}"`
+              : 'No products available'}
+        </div>
+      ) : (
+        filteredProducts.map(product => (
+          <div key={product.id} className="card bg-base-200 shadow-sm">
+            <button
+              className="delete-product-btn"
+              onClick={() => deleteProduct(product.id)}
+              title="Delete product"
+            >
+              ✕
+            </button>
+            <div className="card-body p-3">
+              <h3 className="font-semibold text-sm mb-1">{product.name}</h3>
+              <div className="text-xl font-bold mb-1 product-price">
+                ${product.price.toFixed(2)}
+              </div>
+              <div className="text-xs opacity-70 mb-2">{product.category}</div>
+              <div className="flex gap-2">
+                <button
+                  className="btn btn-xs bg-base-300 border-0 text-2xl favorite-btn"
+                  style={{ color: favorites.includes(product.id) ? '#ff5252' : '#666' }}
+                  onClick={() => toggleFavorite(product.id)}
+                  title={favorites.includes(product.id) ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                  {favorites.includes(product.id) ? '❤️' : '🤍'}
+                </button>
+                <button
+                  className="btn btn-xs btn-primary"
+                  onClick={() => addToCart(product)}
+                >
+                  + Add
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))
+      )}
     </div>
   );
 }

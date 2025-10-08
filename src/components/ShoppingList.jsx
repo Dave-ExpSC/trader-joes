@@ -3,6 +3,12 @@ import React from 'react';
 function ShoppingList({ cart, removeFromCart }) {
   const total = cart.reduce((sum, item) => sum + item.price, 0);
 
+  const handleCheckout = () => {
+    if (cart.length > 0) {
+      alert(`Checkout - Total: $${total.toFixed(2)}\n\nItems:\n${cart.map(item => `${item.name} - $${item.price.toFixed(2)}`).join('\n')}`);
+    }
+  };
+
   return (
     <div className="shopping-list-panel">
       <h2 className="text-lg font-bold">Shopping List</h2>
@@ -21,6 +27,7 @@ function ShoppingList({ cart, removeFromCart }) {
               <button
                 className="btn btn-xs btn-ghost"
                 onClick={() => removeFromCart(index)}
+                title="Remove from cart"
               >
                 ✕
               </button>
@@ -38,6 +45,7 @@ function ShoppingList({ cart, removeFromCart }) {
         <button 
           className="btn btn-primary w-full" 
           disabled={cart.length === 0}
+          onClick={handleCheckout}
         >
           Checkout
         </button>
