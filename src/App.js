@@ -96,6 +96,70 @@ function App() {
     }
   };
 
+  const exportProducts = () => {
+    const dataStr = JSON.stringify(products, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'trader-joes-products.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const importProducts = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedProducts = JSON.parse(e.target.result);
+        if (!Array.isArray(importedProducts)) {
+          alert('Invalid file format. Expected an array of products.');
+          return;
+        }
+
+        // Merge: add products that don't already exist (by name)
+        setProducts(prev => {
+          const existingNames = prev.map(p => p.name.toLowerCase());
+          const newProducts = importedProducts.filter(
+            p => !existingNames.includes(p.name.toLowerCase())
+          );
+
+          // Assign new IDs to avoid conflicts
+          const productsWithNewIds = newProducts.map(p => ({
+            ...p,
+            id: Date.now() + Math.random()
+          }));
+
+          if (newProducts.length === 0) {
+            alert('No new products to import. All products already exist.');
+            return prev;
+          }
+
+          alert(`Imported ${newProducts.length} new product(s).`);
+          return [...prev, ...productsWithNewIds];
+        });
+      } catch (error) {
+        alert('Error reading file. Please make sure it\'s a valid JSON file.');
+      }
+    };
+    reader.readAsText(file);
+    // Reset the input so the same file can be imported again
+    event.target.value = '';
+  };
+
+  const resetToDefaults = () => {
+    if (window.confirm('Reset to default products?\n\nThis will remove all custom products and restore the original 12 items.')) {
+      setProducts(sampleProducts);
+      setFavorites([]);
+      setCart([]);
+    }
+  };
+
   const deleteProduct = (productId) => {
     const product = products.find(p => p.id === productId);
     if (product && window.confirm(`Delete "${product.name}"?\n\nThis will remove it from your product list.`)) {
@@ -156,11 +220,37 @@ function App() {
           >
             Search
           </button>
-          <button 
+          <button
             className="btn btn-success"
             onClick={() => setShowAddProduct(!showAddProduct)}
           >
             + Add Product
+          </button>
+          <button
+            className="btn btn-outline"
+            onClick={exportProducts}
+            title="Download products as JSON file"
+          >
+            ↓ Export
+          </button>
+          <label
+            className="btn btn-outline"
+            title="Import products from JSON file"
+          >
+            ↑ Import
+            <input
+              type="file"
+              accept=".json"
+              onChange={importProducts}
+              style={{ display: 'none' }}
+            />
+          </label>
+          <button
+            className="btn btn-outline btn-warning"
+            onClick={resetToDefaults}
+            title="Reset to default products"
+          >
+            ↺ Reset
           </button>
         </div>
 
