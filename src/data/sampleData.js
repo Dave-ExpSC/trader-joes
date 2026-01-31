@@ -1,4 +1,4 @@
-export const allProducts = [
+export const products = [
   { id: 1, name: 'Mandarin Orange Chicken', price: 4.99, category: 'Frozen' },
   { id: 2, name: 'Everything But The Bagel Seasoning', price: 2.99, category: 'Pantry' },
   { id: 3, name: 'Cauliflower Gnocchi', price: 2.69, category: 'Frozen' },
