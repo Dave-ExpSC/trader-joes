@@ -1,8 +1,19 @@
 import React from 'react';
 
-function ProductList({ products, searchQuery, activeTab, favorites, toggleFavorite, addToCart, deleteProduct, cart }) {
+function ProductList({ products, searchQuery, activeTab, favorites, toggleFavorite, addToCart, deleteProduct, cart, selectedCategory }) {
   const isInCart = (productId) => {
     return cart.some(item => item.id === productId);
+  };
+
+  const getCategoryIcon = (category) => {
+    const icons = {
+      'Frozen': '❄️',
+      'Pantry': '🥫',
+      'Snacks': '🍿',
+      'Produce': '🥬',
+      'Dairy': '🧀'
+    };
+    return icons[category] || '📦';
   };
 
   const getFilteredProducts = () => {
@@ -20,6 +31,12 @@ function ProductList({ products, searchQuery, activeTab, favorites, toggleFavori
       );
     }
 
+    if (selectedCategory && selectedCategory !== 'All') {
+      filteredProducts = filteredProducts.filter(p =>
+        p.category === selectedCategory
+      );
+    }
+
     return filteredProducts;
   };
 
@@ -28,21 +45,26 @@ function ProductList({ products, searchQuery, activeTab, favorites, toggleFavori
   return (
     <div className="products-grid">
       {filteredProducts.length === 0 ? (
-        <div style={{ 
-          gridColumn: '1 / -1', 
-          textAlign: 'center', 
-          padding: '3rem', 
-          color: '#999' 
-        }}>
-          {activeTab === 'favorites' 
-            ? 'No favorites yet. Click the ❤️ button on products to add them!'
-            : searchQuery 
-              ? `No products found matching "${searchQuery}"`
-              : 'No products available'}
+        <div className="empty-state">
+          <div className="empty-icon">
+            {activeTab === 'favorites' ? '💝' : '🔍'}
+          </div>
+          <div className="empty-text">
+            {activeTab === 'favorites'
+              ? 'No favorites yet'
+              : searchQuery
+                ? `No products found for "${searchQuery}"`
+                : 'No products available'}
+          </div>
+          <div className="empty-hint">
+            {activeTab === 'favorites'
+              ? 'Click the ❤️ button on products to add them!'
+              : 'Try adjusting your search or filters'}
+          </div>
         </div>
       ) : (
         filteredProducts.map(product => (
-          <div key={product.id} className="card bg-base-200 shadow-sm">
+          <div key={product.id} className="product-card">
             <button
               className="delete-product-btn"
               onClick={() => deleteProduct(product.id)}
@@ -50,26 +72,28 @@ function ProductList({ products, searchQuery, activeTab, favorites, toggleFavori
             >
               ✕
             </button>
+            <div className={`category-badge category-${product.category.toLowerCase()}`}>
+              <span className="category-icon">{getCategoryIcon(product.category)}</span>
+              {product.category}
+            </div>
             <div className="card-body">
-              <h3>{product.name}</h3>
+              <h3 className="product-name">{product.name}</h3>
               <div className="product-price">
                 ${product.price.toFixed(2)}
               </div>
-              <div className="text-xs">{product.category}</div>
-              <div className="flex gap-2">
+              <div className="card-actions">
                 <button
-                  className="btn btn-xs bg-base-300 border-0 text-2xl favorite-btn"
-                  style={{ color: favorites.includes(product.id) ? '#ff5252' : '#666' }}
+                  className={`favorite-btn ${favorites.includes(product.id) ? 'active' : ''}`}
                   onClick={() => toggleFavorite(product.id)}
                   title={favorites.includes(product.id) ? 'Remove from favorites' : 'Add to favorites'}
                 >
                   {favorites.includes(product.id) ? '❤️' : '🤍'}
                 </button>
                 <button
-                  className={`btn btn-xs ${isInCart(product.id) ? 'btn-in-cart' : 'btn-primary'}`}
+                  className={`add-btn ${isInCart(product.id) ? 'in-cart' : ''}`}
                   onClick={() => addToCart(product)}
                 >
-                  + Add
+                  {isInCart(product.id) ? '✓ Added' : '+ Add'}
                 </button>
               </div>
             </div>
