@@ -3,7 +3,7 @@ import './App.css';
 import ProductList from './components/ProductList';
 import ShoppingList from './components/ShoppingList';
 import { loadProducts, saveProducts } from './utils/localStorage';
-import { products as sampleProducts } from './data/sampleData';
+import { allProducts as sampleProducts } from './data/sampleData';
 
 function App() {
   const [products, setProducts] = useState([]);
