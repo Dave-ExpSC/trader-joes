@@ -277,7 +277,7 @@ body {
 /* New Product Card Styling */
 .product-card {
   background: white;
-  border: 1px solid #e8e8e8;
+  border: 2px solid #d0d0d0;
   border-radius: 0.75rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   position: relative;
@@ -288,7 +288,7 @@ body {
 .product-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-  border-color: #d0d0d0;
+  border-color: #a0a0a0;
 }
 
 .products-grid .card {
