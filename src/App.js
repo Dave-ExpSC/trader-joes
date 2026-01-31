@@ -17,6 +17,9 @@ function App() {
     price: '',
     category: 'Frozen'
   });
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  const categories = ['All', 'Frozen', 'Pantry', 'Snacks', 'Produce', 'Dairy'];
 
   // Load data on mount
   useEffect(() => {
@@ -254,6 +257,18 @@ function App() {
           </button>
         </div>
 
+        <div className="category-filters">
+          {categories.map(category => (
+            <button
+              key={category}
+              className={`category-chip ${selectedCategory === category ? 'active' : ''} category-${category.toLowerCase()}`}
+              onClick={() => setSelectedCategory(category)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
         {showAddProduct && (
           <div className="add-product-form">
             <input
@@ -306,6 +321,7 @@ function App() {
           addToCart={addToCart}
           deleteProduct={deleteProduct}
           cart={cart}
+          selectedCategory={selectedCategory}
         />
       </div>
 
