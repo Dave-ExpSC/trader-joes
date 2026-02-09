@@ -266,12 +266,13 @@ body {
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 220px));
   gap: 1rem;
   padding: 1rem;
   background: #f8f9fa;
   overflow-y: auto;
   flex: 1;
+  justify-content: center;
 }
 
 /* New Product Card Styling */
@@ -283,6 +284,10 @@ body {
   position: relative;
   transition: all 0.25s ease;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  height: 100%;
 }
 
 .product-card:hover {
@@ -377,6 +382,9 @@ body {
 /* Product Card Body */
 .product-card .card-body {
   padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .product-name {
@@ -386,6 +394,7 @@ body {
   margin-bottom: 0.5rem;
   line-height: 1.3;
   min-height: 2.5rem;
+  max-height: 2.5rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -618,24 +627,80 @@ body {
   .app-container {
     flex-direction: column;
   }
-  
+
   .shopping-list-panel {
     width: 100%;
     border-left: none;
     border-top: 1px solid #e0e0e0;
     max-height: 40vh;
   }
-  
+
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(160px, 180px));
+    gap: 0.75rem;
+    padding: 0.75rem;
+    justify-content: center;
+    grid-auto-rows: auto;
+  }
+
+  /* Ensure all card elements are visible on tablets and phones */
+  .product-card {
+    min-height: 200px;
+    height: auto;
+  }
+
+  .product-price {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    display: block !important;
+    flex-shrink: 0;
+  }
+
+  .product-name {
+    font-size: 0.85rem;
+    min-height: auto;
+    max-height: 2.4rem;
+    -webkit-line-clamp: 2;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .product-card .card-body {
+    padding: 0.75rem;
+    min-height: 135px;
+  }
+
+  .category-badge {
+    font-size: 0.65rem;
+    padding: 0.35rem 0.6rem;
+    flex-shrink: 0;
+  }
+
+  .card-actions {
     gap: 0.4rem;
-    padding: 0.5rem;
+    margin-top: auto;
+    flex-shrink: 0;
+  }
+
+  .favorite-btn {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .add-btn {
+    height: 2rem;
+    font-size: 0.75rem;
+    flex-shrink: 0;
   }
 }
 
 @media (max-width: 480px) {
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(155px, 170px));
+    grid-auto-rows: auto;
   }
 
   .header {
@@ -654,6 +719,59 @@ body {
   .category-chip {
     padding: 0.4rem 0.75rem;
     font-size: 0.75rem;
+  }
+
+  /* Ensure all card elements are visible on mobile */
+  .product-card {
+    min-height: 200px;
+    height: auto;
+  }
+
+  .product-price {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    display: block !important;
+    flex-shrink: 0;
+  }
+
+  .product-name {
+    font-size: 0.85rem;
+    min-height: auto;
+    max-height: 2.4rem;
+    -webkit-line-clamp: 2;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .product-card .card-body {
+    padding: 0.75rem;
+    min-height: 135px;
+  }
+
+  .category-badge {
+    font-size: 0.65rem;
+    padding: 0.35rem 0.6rem;
+    flex-shrink: 0;
+  }
+
+  .card-actions {
+    gap: 0.4rem;
+    margin-top: auto;
+    flex-shrink: 0;
+  }
+
+  .favorite-btn {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .add-btn {
+    height: 2rem;
+    font-size: 0.75rem;
+    flex-shrink: 0;
   }
 }
 

@@ -37,6 +37,14 @@ function ProductList({ products, searchQuery, activeTab, favorites, toggleFavori
       );
     }
 
+    // Sort by category, then by name
+    const categoryOrder = ['Frozen', 'Pantry', 'Snacks', 'Produce', 'Dairy'];
+    filteredProducts.sort((a, b) => {
+      const categoryDiff = categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category);
+      if (categoryDiff !== 0) return categoryDiff;
+      return a.name.localeCompare(b.name);
+    });
+
     return filteredProducts;
   };
 
