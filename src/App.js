@@ -19,7 +19,7 @@ function App() {
   });
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const categories = ['All', 'Frozen', 'Pantry', 'Snacks', 'Produce', 'Dairy'];
+  const categories = ['All', 'Produce', 'Pantry', 'Snacks', 'Frozen', 'Dairy'];
 
   // Load data on mount
   useEffect(() => {
