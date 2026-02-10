@@ -4,6 +4,13 @@ import ProductList from './components/ProductList';
 import ShoppingList from './components/ShoppingList';
 import { loadProducts, saveProducts } from './utils/localStorage';
 import { products as sampleProducts } from './data/sampleData';
+import {
+  saveProductsToFirebase,
+  saveFavoritesToFirebase,
+  saveCartToFirebase,
+  loadDataFromFirebase,
+  subscribeToFirebaseUpdates
+} from './firebase/firebaseService';
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -23,38 +30,107 @@ function App() {
 
   const categories = ['All', 'Produce', 'Pantry', 'Snacks', 'Frozen', 'Dairy'];
 
-  // Load data on mount
+  // Load data on mount from Firebase (with localStorage fallback)
   useEffect(() => {
-    const savedProducts = loadProducts();
-    if (savedProducts && savedProducts.length > 0) {
-      setProducts(savedProducts);
-    } else {
-      setProducts(sampleProducts);
-      saveProducts(sampleProducts);
-    }
+    const loadData = async () => {
+      try {
+        // Try to load from Firebase first
+        const firebaseData = await loadDataFromFirebase();
 
-    const savedFavorites = JSON.parse(localStorage.getItem('tj-favorites') || '[]');
-    const savedCart = JSON.parse(localStorage.getItem('tj-cart') || '[]');
-    
-    setFavorites(savedFavorites);
-    setCart(savedCart);
+        if (firebaseData) {
+          // Load from Firebase
+          if (firebaseData.products && firebaseData.products.length > 0) {
+            setProducts(firebaseData.products);
+            saveProducts(firebaseData.products); // Sync to localStorage
+          }
+          if (firebaseData.favorites) {
+            setFavorites(firebaseData.favorites);
+            localStorage.setItem('tj-favorites', JSON.stringify(firebaseData.favorites));
+          }
+          if (firebaseData.cart) {
+            setCart(firebaseData.cart);
+            localStorage.setItem('tj-cart', JSON.stringify(firebaseData.cart));
+          }
+        } else {
+          // Fallback to localStorage if Firebase has no data
+          const savedProducts = loadProducts();
+          if (savedProducts && savedProducts.length > 0) {
+            setProducts(savedProducts);
+            saveProductsToFirebase(savedProducts); // Sync to Firebase
+          } else {
+            setProducts(sampleProducts);
+            saveProducts(sampleProducts);
+            saveProductsToFirebase(sampleProducts);
+          }
+
+          const savedFavorites = JSON.parse(localStorage.getItem('tj-favorites') || '[]');
+          const savedCart = JSON.parse(localStorage.getItem('tj-cart') || '[]');
+
+          setFavorites(savedFavorites);
+          setCart(savedCart);
+
+          if (savedFavorites.length > 0) saveFavoritesToFirebase(savedFavorites);
+          if (savedCart.length > 0) saveCartToFirebase(savedCart);
+        }
+      } catch (error) {
+        console.error('Error loading from Firebase, using localStorage:', error);
+        // Fallback to localStorage if Firebase fails
+        const savedProducts = loadProducts();
+        if (savedProducts && savedProducts.length > 0) {
+          setProducts(savedProducts);
+        } else {
+          setProducts(sampleProducts);
+          saveProducts(sampleProducts);
+        }
+
+        const savedFavorites = JSON.parse(localStorage.getItem('tj-favorites') || '[]');
+        const savedCart = JSON.parse(localStorage.getItem('tj-cart') || '[]');
+
+        setFavorites(savedFavorites);
+        setCart(savedCart);
+      }
+    };
+
+    loadData();
+
+    // Subscribe to real-time Firebase updates
+    const unsubscribe = subscribeToFirebaseUpdates((data) => {
+      if (data.products) {
+        setProducts(data.products);
+        saveProducts(data.products);
+      }
+      if (data.favorites) {
+        setFavorites(data.favorites);
+        localStorage.setItem('tj-favorites', JSON.stringify(data.favorites));
+      }
+      if (data.cart) {
+        setCart(data.cart);
+        localStorage.setItem('tj-cart', JSON.stringify(data.cart));
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, []);
 
   // Save products when they change
   useEffect(() => {
     if (products.length > 0) {
       saveProducts(products);
+      saveProductsToFirebase(products);
     }
   }, [products]);
 
   // Save favorites when they change
   useEffect(() => {
     localStorage.setItem('tj-favorites', JSON.stringify(favorites));
+    saveFavoritesToFirebase(favorites);
   }, [favorites]);
 
   // Save cart when it changes
   useEffect(() => {
     localStorage.setItem('tj-cart', JSON.stringify(cart));
+    saveCartToFirebase(cart);
   }, [cart]);
 
   const toggleFavorite = (productId) => {
