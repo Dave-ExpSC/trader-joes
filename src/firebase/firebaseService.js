@@ -7,15 +7,12 @@ import {
   serverTimestamp
 } from 'firebase/firestore';
 
-// User ID - using a simple local ID for now
-// In a real app, you'd use Firebase Auth
+// User ID - using a fixed shared ID for cross-device sync
+// All devices will use the same user ID to sync data
+// In a production app, you'd use Firebase Auth for individual user accounts
 const getUserId = () => {
-  let userId = localStorage.getItem('tj-user-id');
-  if (!userId) {
-    userId = 'user-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('tj-user-id', userId);
-  }
-  return userId;
+  // Use a fixed user ID so all devices sync to the same data
+  return 'shared-trader-joes-user';
 };
 
 // Save products to Firebase
