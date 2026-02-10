@@ -15,7 +15,8 @@ function App() {
   const [newProduct, setNewProduct] = useState({
     name: '',
     price: '',
-    category: 'Frozen'
+    category: 'Frozen',
+    imageUrl: ''
   });
   const [selectedCategory, setSelectedCategory] = useState('All');
 
@@ -91,10 +92,11 @@ function App() {
         id: Date.now(),
         name: newProduct.name,
         price: parseFloat(newProduct.price),
-        category: newProduct.category
+        category: newProduct.category,
+        imageUrl: newProduct.imageUrl || ''
       };
       setProducts(prev => [...prev, product]);
-      setNewProduct({ name: '', price: '', category: 'Frozen' });
+      setNewProduct({ name: '', price: '', category: 'Frozen', imageUrl: '' });
       setShowAddProduct(false);
     }
   };
@@ -286,6 +288,13 @@ function App() {
               value={newProduct.price}
               onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
             />
+            <input
+              type="text"
+              placeholder="Image URL (optional)"
+              className="input input-bordered image-url-input"
+              value={newProduct.imageUrl}
+              onChange={(e) => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
+            />
             <select
               className="select select-bordered"
               value={newProduct.category}
@@ -297,13 +306,13 @@ function App() {
               <option>Produce</option>
               <option>Dairy</option>
             </select>
-            <button 
+            <button
               className="btn btn-success"
               onClick={handleAddProduct}
             >
               Add
             </button>
-            <button 
+            <button
               className="btn btn-ghost"
               onClick={() => setShowAddProduct(false)}
             >

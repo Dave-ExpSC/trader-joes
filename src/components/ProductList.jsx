@@ -84,6 +84,16 @@ function ProductList({ products, searchQuery, activeTab, favorites, toggleFavori
               <span className="category-icon">{getCategoryIcon(product.category)}</span>
               {product.category}
             </div>
+            {product.imageUrl && (
+              <div className="product-image-container">
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="product-image"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              </div>
+            )}
             <div className="card-body">
               <h3 className="product-name">{product.name}</h3>
               <div className="product-price">
