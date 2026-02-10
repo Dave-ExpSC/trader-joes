@@ -352,6 +352,36 @@ body {
   color: #f57f17;
 }
 
+.edit-product-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 2.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 50%;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0;
+  z-index: 10;
+  transition: all 0.2s;
+  opacity: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.product-card:hover .edit-product-btn {
+  opacity: 1;
+}
+
+.edit-product-btn:hover {
+  background: #4caf50;
+  transform: scale(1.1);
+}
+
 .delete-product-btn {
   position: absolute;
   top: 0.5rem;

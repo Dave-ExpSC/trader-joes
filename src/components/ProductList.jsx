@@ -1,6 +1,6 @@
 import React from 'react';
 
-function ProductList({ products, searchQuery, activeTab, favorites, toggleFavorite, addToCart, deleteProduct, cart, selectedCategory }) {
+function ProductList({ products, searchQuery, activeTab, favorites, toggleFavorite, addToCart, deleteProduct, editProduct, cart, selectedCategory }) {
   const isInCart = (productId) => {
     return cart.some(item => item.id === productId);
   };
@@ -73,6 +73,13 @@ function ProductList({ products, searchQuery, activeTab, favorites, toggleFavori
       ) : (
         filteredProducts.map(product => (
           <div key={product.id} className="product-card">
+            <button
+              className="edit-product-btn"
+              onClick={() => editProduct(product)}
+              title="Edit product"
+            >
+              ✏️
+            </button>
             <button
               className="delete-product-btn"
               onClick={() => deleteProduct(product.id)}

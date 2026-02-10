@@ -12,6 +12,7 @@ function App() {
   const [favorites, setFavorites] = useState([]);
   const [cart, setCart] = useState([]);
   const [showAddProduct, setShowAddProduct] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
   const [newProduct, setNewProduct] = useState({
     name: '',
     price: '',
@@ -88,17 +89,51 @@ function App() {
 
   const handleAddProduct = () => {
     if (newProduct.name && newProduct.price) {
-      const product = {
-        id: Date.now(),
-        name: newProduct.name,
-        price: parseFloat(newProduct.price),
-        category: newProduct.category,
-        imageUrl: newProduct.imageUrl || ''
-      };
-      setProducts(prev => [...prev, product]);
+      if (editingProduct) {
+        // Update existing product
+        setProducts(prev => prev.map(p =>
+          p.id === editingProduct.id
+            ? {
+                ...p,
+                name: newProduct.name,
+                price: parseFloat(newProduct.price),
+                category: newProduct.category,
+                imageUrl: newProduct.imageUrl || ''
+              }
+            : p
+        ));
+        setEditingProduct(null);
+      } else {
+        // Add new product
+        const product = {
+          id: Date.now(),
+          name: newProduct.name,
+          price: parseFloat(newProduct.price),
+          category: newProduct.category,
+          imageUrl: newProduct.imageUrl || ''
+        };
+        setProducts(prev => [...prev, product]);
+      }
       setNewProduct({ name: '', price: '', category: 'Frozen', imageUrl: '' });
       setShowAddProduct(false);
     }
+  };
+
+  const handleEditProduct = (product) => {
+    setEditingProduct(product);
+    setNewProduct({
+      name: product.name,
+      price: product.price.toString(),
+      category: product.category,
+      imageUrl: product.imageUrl || ''
+    });
+    setShowAddProduct(true);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingProduct(null);
+    setNewProduct({ name: '', price: '', category: 'Frozen', imageUrl: '' });
+    setShowAddProduct(false);
   };
 
   const exportProducts = () => {
@@ -310,11 +345,11 @@ function App() {
               className="btn btn-success"
               onClick={handleAddProduct}
             >
-              Add
+              {editingProduct ? 'Save' : 'Add'}
             </button>
             <button
               className="btn btn-ghost"
-              onClick={() => setShowAddProduct(false)}
+              onClick={handleCancelEdit}
             >
               Cancel
             </button>
@@ -329,6 +364,7 @@ function App() {
           toggleFavorite={toggleFavorite}
           addToCart={addToCart}
           deleteProduct={deleteProduct}
+          editProduct={handleEditProduct}
           cart={cart}
           selectedCategory={selectedCategory}
         />
