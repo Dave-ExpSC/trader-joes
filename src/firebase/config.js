@@ -1,8 +1,8 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 // Firebase configuration
-// You'll need to replace these with your actual Firebase project credentials
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "YOUR_API_KEY",
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "YOUR_AUTH_DOMAIN",
@@ -15,5 +15,6 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firestore
+// Initialize Firestore and Auth
 export const db = getFirestore(app);
+export const auth = getAuth(app);

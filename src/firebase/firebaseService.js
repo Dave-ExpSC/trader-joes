@@ -7,67 +7,51 @@ import {
   serverTimestamp
 } from 'firebase/firestore';
 
-// User ID - using a fixed shared ID for cross-device sync
-// All devices will use the same user ID to sync data
-// In a production app, you'd use Firebase Auth for individual user accounts
-const getUserId = () => {
-  // Use a fixed user ID so all devices sync to the same data
-  return 'shared-trader-joes-user';
-};
-
-// Save products to Firebase
-export const saveProductsToFirebase = async (products) => {
+// Save products to Firebase for a specific user
+export const saveProductsToFirebase = async (userId, products) => {
   try {
-    const userId = getUserId();
     await setDoc(doc(db, 'users', userId), {
       products: products,
       updatedAt: serverTimestamp()
     }, { merge: true });
-    console.log('Products saved to Firebase');
   } catch (error) {
     console.error('Error saving products to Firebase:', error);
   }
 };
 
-// Save favorites to Firebase
-export const saveFavoritesToFirebase = async (favorites) => {
+// Save favorites to Firebase for a specific user
+export const saveFavoritesToFirebase = async (userId, favorites) => {
   try {
-    const userId = getUserId();
     await setDoc(doc(db, 'users', userId), {
       favorites: favorites,
       updatedAt: serverTimestamp()
     }, { merge: true });
-    console.log('Favorites saved to Firebase');
   } catch (error) {
     console.error('Error saving favorites to Firebase:', error);
   }
 };
 
-// Save cart to Firebase
-export const saveCartToFirebase = async (cart) => {
+// Save cart to Firebase for a specific user
+export const saveCartToFirebase = async (userId, cart) => {
   try {
-    const userId = getUserId();
     await setDoc(doc(db, 'users', userId), {
       cart: cart,
       updatedAt: serverTimestamp()
     }, { merge: true });
-    console.log('Cart saved to Firebase');
   } catch (error) {
     console.error('Error saving cart to Firebase:', error);
   }
 };
 
-// Load data from Firebase
-export const loadDataFromFirebase = async () => {
+// Load data from Firebase for a specific user
+export const loadDataFromFirebase = async (userId) => {
   try {
-    const userId = getUserId();
     const docRef = doc(db, 'users', userId);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
       return docSnap.data();
     } else {
-      console.log('No data found in Firebase');
       return null;
     }
   } catch (error) {
@@ -76,10 +60,9 @@ export const loadDataFromFirebase = async () => {
   }
 };
 
-// Subscribe to real-time updates
-export const subscribeToFirebaseUpdates = (callback) => {
+// Subscribe to real-time updates for a specific user
+export const subscribeToFirebaseUpdates = (userId, callback) => {
   try {
-    const userId = getUserId();
     const docRef = doc(db, 'users', userId);
 
     const unsubscribe = onSnapshot(docRef, (doc) => {
@@ -91,6 +74,6 @@ export const subscribeToFirebaseUpdates = (callback) => {
     return unsubscribe;
   } catch (error) {
     console.error('Error subscribing to Firebase updates:', error);
-    return () => {}; // Return empty function if error
+    return () => {};
   }
 };

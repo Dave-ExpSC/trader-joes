@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import ProductList from './components/ProductList';
 import ShoppingList from './components/ShoppingList';
+import Login from './components/Login';
+import { useAuth } from './context/AuthContext';
 import { loadProducts, saveProducts } from './utils/localStorage';
 import { products as sampleProducts } from './data/sampleData';
 import {
@@ -13,6 +15,7 @@ import {
 } from './firebase/firebaseService';
 
 function App() {
+  const { user, logout } = useAuth();
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
@@ -30,12 +33,13 @@ function App() {
 
   const categories = ['All', 'Produce', 'Pantry', 'Snacks', 'Frozen', 'Dairy'];
 
-  // Load data on mount from Firebase (with localStorage fallback)
+  // Load data when user changes
   useEffect(() => {
+    if (!user) return;
     const loadData = async () => {
       try {
         // Try to load from Firebase first
-        const firebaseData = await loadDataFromFirebase();
+        const firebaseData = await loadDataFromFirebase(user.uid);
 
         if (firebaseData) {
           // Load from Firebase
@@ -52,25 +56,12 @@ function App() {
             localStorage.setItem('tj-cart', JSON.stringify(firebaseData.cart));
           }
         } else {
-          // Fallback to localStorage if Firebase has no data
-          const savedProducts = loadProducts();
-          if (savedProducts && savedProducts.length > 0) {
-            setProducts(savedProducts);
-            saveProductsToFirebase(savedProducts); // Sync to Firebase
-          } else {
-            setProducts(sampleProducts);
-            saveProducts(sampleProducts);
-            saveProductsToFirebase(sampleProducts);
-          }
-
-          const savedFavorites = JSON.parse(localStorage.getItem('tj-favorites') || '[]');
-          const savedCart = JSON.parse(localStorage.getItem('tj-cart') || '[]');
-
-          setFavorites(savedFavorites);
-          setCart(savedCart);
-
-          if (savedFavorites.length > 0) saveFavoritesToFirebase(savedFavorites);
-          if (savedCart.length > 0) saveCartToFirebase(savedCart);
+          // New user - load sample products
+          setProducts(sampleProducts);
+          saveProducts(sampleProducts);
+          saveProductsToFirebase(user.uid, sampleProducts);
+          setFavorites([]);
+          setCart([]);
         }
       } catch (error) {
         console.error('Error loading from Firebase, using localStorage:', error);
@@ -94,7 +85,7 @@ function App() {
     loadData();
 
     // Subscribe to real-time Firebase updates
-    const unsubscribe = subscribeToFirebaseUpdates((data) => {
+    const unsubscribe = subscribeToFirebaseUpdates(user.uid, (data) => {
       if (data.products) {
         setProducts(data.products);
         saveProducts(data.products);
@@ -111,27 +102,31 @@ function App() {
 
     // Cleanup subscription on unmount
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   // Save products when they change
   useEffect(() => {
-    if (products.length > 0) {
+    if (user && products.length > 0) {
       saveProducts(products);
-      saveProductsToFirebase(products);
+      saveProductsToFirebase(user.uid, products);
     }
-  }, [products]);
+  }, [products, user]);
 
   // Save favorites when they change
   useEffect(() => {
-    localStorage.setItem('tj-favorites', JSON.stringify(favorites));
-    saveFavoritesToFirebase(favorites);
-  }, [favorites]);
+    if (user) {
+      localStorage.setItem('tj-favorites', JSON.stringify(favorites));
+      saveFavoritesToFirebase(user.uid, favorites);
+    }
+  }, [favorites, user]);
 
   // Save cart when it changes
   useEffect(() => {
-    localStorage.setItem('tj-cart', JSON.stringify(cart));
-    saveCartToFirebase(cart);
-  }, [cart]);
+    if (user) {
+      localStorage.setItem('tj-cart', JSON.stringify(cart));
+      saveCartToFirebase(user.uid, cart);
+    }
+  }, [cart, user]);
 
   const toggleFavorite = (productId) => {
     setFavorites(prev => {
@@ -288,12 +283,21 @@ function App() {
     }
   };
 
+  if (!user) {
+    return <Login />;
+  }
+
   return (
     <div className="app-container">
       <div className="main-section">
         <div className="header">
           <span className="header-icon">🛒</span>
           <h1 className="header-title">Trader Joe's Products</h1>
+          <div className="header-user">
+            {user.photoURL && <img src={user.photoURL} alt="avatar" className="user-avatar" />}
+            <span className="user-name">{user.displayName || user.email}</span>
+            <button className="btn-signout" onClick={logout}>Sign out</button>
+          </div>
         </div>
 
         <div className="search-bar">
