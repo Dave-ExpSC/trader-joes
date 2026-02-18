@@ -30,6 +30,8 @@ function App() {
     imageUrl: ''
   });
   const [selectedCategory, setSelectedCategory] = useState('All');
+  // Flag to prevent save effects from firing when data comes in from Firebase
+  const isFirebaseUpdate = React.useRef(false);
 
   const categories = ['All', 'Produce', 'Pantry', 'Snacks', 'Frozen', 'Dairy'];
 
@@ -86,6 +88,8 @@ function App() {
 
     // Subscribe to real-time Firebase updates
     const unsubscribe = subscribeToFirebaseUpdates(user.uid, (data) => {
+      // Set flag so save effects don't write back to Firebase
+      isFirebaseUpdate.current = true;
       if (data.products) {
         setProducts(data.products);
         saveProducts(data.products);
@@ -98,31 +102,33 @@ function App() {
         setCart(data.cart);
         localStorage.setItem('tj-cart', JSON.stringify(data.cart));
       }
+      // Reset flag after state updates are queued
+      setTimeout(() => { isFirebaseUpdate.current = false; }, 500);
     });
 
     // Cleanup subscription on unmount
     return () => unsubscribe();
   }, [user]);
 
-  // Save products when they change
+  // Save products when they change (skip if update came from Firebase)
   useEffect(() => {
-    if (user && products.length > 0) {
+    if (user && products.length > 0 && !isFirebaseUpdate.current) {
       saveProducts(products);
       saveProductsToFirebase(user.uid, products);
     }
   }, [products, user]);
 
-  // Save favorites when they change
+  // Save favorites when they change (skip if update came from Firebase)
   useEffect(() => {
-    if (user) {
+    if (user && !isFirebaseUpdate.current) {
       localStorage.setItem('tj-favorites', JSON.stringify(favorites));
       saveFavoritesToFirebase(user.uid, favorites);
     }
   }, [favorites, user]);
 
-  // Save cart when it changes
+  // Save cart when it changes (skip if update came from Firebase)
   useEffect(() => {
-    if (user) {
+    if (user && !isFirebaseUpdate.current) {
       localStorage.setItem('tj-cart', JSON.stringify(cart));
       saveCartToFirebase(user.uid, cart);
     }
