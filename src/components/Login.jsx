@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { auth } from '../firebase/config';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { useAuth } from '../context/AuthContext';
+import { lookupShareCode } from '../firebase/firebaseService';
 
 const Login = () => {
+  const { loginAsGuest } = useAuth();
   const [error, setError] = useState('');
+  const [shareCode, setShareCode] = useState('');
+  const [loadingCode, setLoadingCode] = useState(false);
+  const [showCodeEntry, setShowCodeEntry] = useState(false);
 
   const handleGoogleSignIn = async () => {
     setError('');
@@ -16,12 +22,31 @@ const Login = () => {
     }
   };
 
+  const handleShareCodeSubmit = async (e) => {
+    e.preventDefault();
+    if (!shareCode.trim()) return;
+    setLoadingCode(true);
+    setError('');
+    try {
+      const ownerId = await lookupShareCode(shareCode);
+      if (ownerId) {
+        loginAsGuest(ownerId);
+      } else {
+        setError('Invalid share code. Please check and try again.');
+      }
+    } catch (err) {
+      setError('Error checking share code. Please try again.');
+    }
+    setLoadingCode(false);
+  };
+
   return (
     <div className="login-container">
       <div className="login-card">
         <span className="login-icon">🛒</span>
         <h1 className="login-title">Trader Joe's</h1>
         <p className="login-subtitle">Your personal shopping list</p>
+
         <button className="btn-google" onClick={handleGoogleSignIn}>
           <svg className="google-icon" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -31,7 +56,37 @@ const Login = () => {
           </svg>
           Sign in with Google
         </button>
+
+        <div className="login-divider">
+          <span>or</span>
+        </div>
+
+        {!showCodeEntry ? (
+          <button className="btn-sharecode-toggle" onClick={() => setShowCodeEntry(true)}>
+            Enter a share code
+          </button>
+        ) : (
+          <form className="sharecode-form" onSubmit={handleShareCodeSubmit}>
+            <input
+              type="text"
+              className="sharecode-input"
+              placeholder="e.g. ABCD-1234"
+              value={shareCode}
+              onChange={(e) => setShareCode(e.target.value.toUpperCase())}
+              maxLength={9}
+              autoFocus
+            />
+            <button className="btn-sharecode-submit" type="submit" disabled={loadingCode}>
+              {loadingCode ? 'Checking...' : 'Join List'}
+            </button>
+          </form>
+        )}
+
         {error && <p className="login-error">{error}</p>}
+
+        <p className="login-help">
+          Sign in with Google to create your own list, or enter a share code to view someone else's list.
+        </p>
       </div>
     </div>
   );

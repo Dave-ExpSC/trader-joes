@@ -73,20 +73,24 @@ function ProductList({ products, searchQuery, activeTab, favorites, toggleFavori
       ) : (
         filteredProducts.map(product => (
           <div key={product.id} className="product-card">
-            <button
-              className="edit-product-btn"
-              onClick={() => editProduct(product)}
-              title="Edit product"
-            >
-              ✏️
-            </button>
-            <button
-              className="delete-product-btn"
-              onClick={() => deleteProduct(product.id)}
-              title="Delete product"
-            >
-              ✕
-            </button>
+            {editProduct && (
+              <button
+                className="edit-product-btn"
+                onClick={() => editProduct(product)}
+                title="Edit product"
+              >
+                ✏️
+              </button>
+            )}
+            {deleteProduct && (
+              <button
+                className="delete-product-btn"
+                onClick={() => deleteProduct(product.id)}
+                title="Delete product"
+              >
+                ✕
+              </button>
+            )}
             <div className={`category-badge category-${product.category.toLowerCase()}`}>
               <span className="category-icon">{getCategoryIcon(product.category)}</span>
               {product.category}

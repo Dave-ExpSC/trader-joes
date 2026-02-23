@@ -11,11 +11,14 @@ import {
   saveFavoritesToFirebase,
   saveCartToFirebase,
   loadDataFromFirebase,
-  subscribeToFirebaseUpdates
+  subscribeToFirebaseUpdates,
+  generateShareCode,
+  saveShareCode,
+  deleteShareCode
 } from './firebase/firebaseService';
 
 function App() {
-  const { user, logout } = useAuth();
+  const { user, effectiveUserId, isGuest, logout } = useAuth();
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
@@ -30,24 +33,25 @@ function App() {
     imageUrl: ''
   });
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [shareCode, setShareCode] = useState(null);
+  const [showSharePanel, setShowSharePanel] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   // Flag to prevent save effects from firing when data comes in from Firebase
   const isFirebaseUpdate = React.useRef(false);
 
   const categories = ['All', 'Produce', 'Pantry', 'Snacks', 'Frozen', 'Dairy'];
 
-  // Load data when user changes
+  // Load data when effectiveUserId changes
   useEffect(() => {
-    if (!user) return;
+    if (!effectiveUserId) return;
     const loadData = async () => {
       try {
-        // Try to load from Firebase first
-        const firebaseData = await loadDataFromFirebase(user.uid);
+        const firebaseData = await loadDataFromFirebase(effectiveUserId);
 
         if (firebaseData) {
-          // Load from Firebase
           if (firebaseData.products && firebaseData.products.length > 0) {
             setProducts(firebaseData.products);
-            saveProducts(firebaseData.products); // Sync to localStorage
+            saveProducts(firebaseData.products);
           }
           if (firebaseData.favorites) {
             setFavorites(firebaseData.favorites);
@@ -57,17 +61,20 @@ function App() {
             setCart(firebaseData.cart);
             localStorage.setItem('tj-cart', JSON.stringify(firebaseData.cart));
           }
-        } else {
-          // New user - load sample products
+          // Load existing share code if owner
+          if (!isGuest && firebaseData.shareCode) {
+            setShareCode(firebaseData.shareCode);
+          }
+        } else if (!isGuest) {
+          // New owner - load sample products
           setProducts(sampleProducts);
           saveProducts(sampleProducts);
-          saveProductsToFirebase(user.uid, sampleProducts);
+          saveProductsToFirebase(effectiveUserId, sampleProducts);
           setFavorites([]);
           setCart([]);
         }
       } catch (error) {
         console.error('Error loading from Firebase, using localStorage:', error);
-        // Fallback to localStorage if Firebase fails
         const savedProducts = loadProducts();
         if (savedProducts && savedProducts.length > 0) {
           setProducts(savedProducts);
@@ -75,10 +82,8 @@ function App() {
           setProducts(sampleProducts);
           saveProducts(sampleProducts);
         }
-
         const savedFavorites = JSON.parse(localStorage.getItem('tj-favorites') || '[]');
         const savedCart = JSON.parse(localStorage.getItem('tj-cart') || '[]');
-
         setFavorites(savedFavorites);
         setCart(savedCart);
       }
@@ -87,8 +92,7 @@ function App() {
     loadData();
 
     // Subscribe to real-time Firebase updates
-    const unsubscribe = subscribeToFirebaseUpdates(user.uid, (data) => {
-      // Set flag so save effects don't write back to Firebase
+    const unsubscribe = subscribeToFirebaseUpdates(effectiveUserId, (data) => {
       isFirebaseUpdate.current = true;
       if (data.products) {
         setProducts(data.products);
@@ -102,37 +106,64 @@ function App() {
         setCart(data.cart);
         localStorage.setItem('tj-cart', JSON.stringify(data.cart));
       }
-      // Reset flag after state updates are queued
+      if (!isGuest && data.shareCode !== undefined) {
+        setShareCode(data.shareCode || null);
+      }
       setTimeout(() => { isFirebaseUpdate.current = false; }, 500);
     });
 
-    // Cleanup subscription on unmount
     return () => unsubscribe();
-  }, [user]);
+  }, [effectiveUserId, isGuest]);
 
-  // Save products when they change (skip if update came from Firebase)
+  // Save products when they change (skip if update came from Firebase, skip if guest)
   useEffect(() => {
-    if (user && products.length > 0 && !isFirebaseUpdate.current) {
+    if (effectiveUserId && !isGuest && products.length > 0 && !isFirebaseUpdate.current) {
       saveProducts(products);
-      saveProductsToFirebase(user.uid, products);
+      saveProductsToFirebase(effectiveUserId, products);
     }
-  }, [products, user]);
+  }, [products, effectiveUserId, isGuest]);
 
-  // Save favorites when they change (skip if update came from Firebase)
+  // Save favorites when they change
   useEffect(() => {
-    if (user && !isFirebaseUpdate.current) {
+    if (effectiveUserId && !isFirebaseUpdate.current) {
       localStorage.setItem('tj-favorites', JSON.stringify(favorites));
-      saveFavoritesToFirebase(user.uid, favorites);
+      if (!isGuest) saveFavoritesToFirebase(effectiveUserId, favorites);
     }
-  }, [favorites, user]);
+  }, [favorites, effectiveUserId, isGuest]);
 
-  // Save cart when it changes (skip if update came from Firebase)
+  // Save cart when it changes
   useEffect(() => {
-    if (user && !isFirebaseUpdate.current) {
+    if (effectiveUserId && !isFirebaseUpdate.current) {
       localStorage.setItem('tj-cart', JSON.stringify(cart));
-      saveCartToFirebase(user.uid, cart);
+      if (!isGuest) saveCartToFirebase(effectiveUserId, cart);
     }
-  }, [cart, user]);
+  }, [cart, effectiveUserId, isGuest]);
+
+  const handleGenerateShareCode = async () => {
+    if (!user) return;
+    const oldCode = shareCode;
+    const newCode = generateShareCode();
+    setShareCode(newCode);
+    if (oldCode) await deleteShareCode(oldCode);
+    await saveShareCode(user.uid, newCode);
+  };
+
+  const handleRevokeShareCode = async () => {
+    if (!user || !shareCode) return;
+    if (window.confirm('Revoke share code? Anyone using it will lose access.')) {
+      await deleteShareCode(shareCode);
+      await saveShareCode(user.uid, '');
+      setShareCode(null);
+    }
+  };
+
+  const handleCopyShareInfo = () => {
+    const text = `Join my Trader Joe's shopping list!\n\nApp: https://traderjoesfavorites.netlify.app\nShare code: ${shareCode}`;
+    navigator.clipboard.writeText(text).then(() => {
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2500);
+    });
+  };
 
   const toggleFavorite = (productId) => {
     setFavorites(prev => {
@@ -167,7 +198,6 @@ function App() {
   const handleAddProduct = () => {
     if (newProduct.name && newProduct.price) {
       if (editingProduct) {
-        // Update existing product
         setProducts(prev => prev.map(p =>
           p.id === editingProduct.id
             ? {
@@ -181,7 +211,6 @@ function App() {
         ));
         setEditingProduct(null);
       } else {
-        // Add new product
         const product = {
           id: Date.now(),
           name: newProduct.name,
@@ -229,7 +258,6 @@ function App() {
   const importProducts = (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
@@ -238,25 +266,19 @@ function App() {
           alert('Invalid file format. Expected an array of products.');
           return;
         }
-
-        // Merge: add products that don't already exist (by name)
         setProducts(prev => {
           const existingNames = prev.map(p => p.name.toLowerCase());
           const newProducts = importedProducts.filter(
             p => !existingNames.includes(p.name.toLowerCase())
           );
-
-          // Assign new IDs to avoid conflicts
           const productsWithNewIds = newProducts.map(p => ({
             ...p,
             id: Date.now() + Math.random()
           }));
-
           if (newProducts.length === 0) {
             alert('No new products to import. All products already exist.');
             return prev;
           }
-
           alert(`Imported ${newProducts.length} new product(s).`);
           return [...prev, ...productsWithNewIds];
         });
@@ -265,7 +287,6 @@ function App() {
       }
     };
     reader.readAsText(file);
-    // Reset the input so the same file can be imported again
     event.target.value = '';
   };
 
@@ -280,16 +301,13 @@ function App() {
   const deleteProduct = (productId) => {
     const product = products.find(p => p.id === productId);
     if (product && window.confirm(`Delete "${product.name}"?\n\nThis will remove it from your product list.`)) {
-      // Remove from products
       setProducts(prev => prev.filter(p => p.id !== productId));
-      // Remove from favorites if it's there
       setFavorites(prev => prev.filter(id => id !== productId));
-      // Remove from cart if it's there
       setCart(prev => prev.filter(item => item.id !== productId));
     }
   };
 
-  if (!user) {
+  if (!effectiveUserId) {
     return <Login />;
   }
 
@@ -298,23 +316,82 @@ function App() {
       <div className="main-section">
         <div className="header">
           <span className="header-icon">🛒</span>
-          <h1 className="header-title">Trader Joe's Products</h1>
+          <h1 className="header-title">Trader Joe's</h1>
           <div className="header-user">
-            {user.photoURL && <img src={user.photoURL} alt="avatar" className="user-avatar" />}
-            <span className="user-name">{user.displayName || user.email}</span>
-            <button className="btn-signout" onClick={logout}>Sign out</button>
+            {isGuest ? (
+              <span className="user-name guest-label">👤 Guest</span>
+            ) : (
+              <>
+                {user?.photoURL && <img src={user.photoURL} alt="avatar" className="user-avatar" />}
+                <span className="user-name">{user?.displayName || user?.email}</span>
+                <button
+                  className="btn-share"
+                  onClick={() => setShowSharePanel(!showSharePanel)}
+                  title="Share your list"
+                >
+                  🔗 Share
+                </button>
+              </>
+            )}
+            <button className="btn-signout" onClick={logout}>
+              {isGuest ? 'Leave' : 'Sign out'}
+            </button>
           </div>
         </div>
 
+        {/* Share Panel - only for owners */}
+        {!isGuest && showSharePanel && (
+          <div className="share-panel">
+            <div className="share-panel-title">Share your list</div>
+            {shareCode ? (
+              <>
+                <div className="share-code-display">
+                  <span className="share-code-label">Your share code:</span>
+                  <span className="share-code-value">{shareCode}</span>
+                </div>
+                <p className="share-instructions">
+                  Send this to anyone you want to share your list with. They open the app and enter this code instead of signing in.
+                </p>
+                <div className="share-actions">
+                  <button className="btn-copy-share" onClick={handleCopyShareInfo}>
+                    {shareCopied ? '✓ Copied!' : '📋 Copy invite message'}
+                  </button>
+                  <button className="btn-regenerate" onClick={handleGenerateShareCode}>
+                    🔄 New code
+                  </button>
+                  <button className="btn-revoke" onClick={handleRevokeShareCode}>
+                    ✕ Revoke
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="share-instructions">
+                  Generate a share code to let others view your list without needing a Google account.
+                </p>
+                <button className="btn-generate-code" onClick={handleGenerateShareCode}>
+                  Generate share code
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {isGuest && (
+          <div className="guest-banner">
+            👀 You are viewing a shared list. Sign in with Google to create your own.
+          </div>
+        )}
+
         <div className="search-bar">
           <div className="tabs tabs-boxed bg-base-200">
-            <button 
+            <button
               className={`tab ${activeTab === 'all' ? 'tab-active' : ''}`}
               onClick={() => setActiveTab('all')}
             >
               All Products
             </button>
-            <button 
+            <button
               className={`tab ${activeTab === 'favorites' ? 'tab-active' : ''}`}
               onClick={() => setActiveTab('favorites')}
             >
@@ -331,7 +408,7 @@ function App() {
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             />
             {searchQuery && (
-              <button 
+              <button
                 className="clear-search-btn"
                 onClick={clearSearch}
                 title="Clear search"
@@ -340,44 +417,48 @@ function App() {
               </button>
             )}
           </div>
-          <button 
+          <button
             className="btn btn-primary"
             onClick={handleSearch}
           >
             Search
           </button>
-          <button
-            className="btn btn-success"
-            onClick={() => setShowAddProduct(!showAddProduct)}
-          >
-            + Add Product
-          </button>
-          <button
-            className="btn btn-outline"
-            onClick={exportProducts}
-            title="Download products as JSON file"
-          >
-            ↓ Export
-          </button>
-          <label
-            className="btn btn-outline"
-            title="Import products from JSON file"
-          >
-            ↑ Import
-            <input
-              type="file"
-              accept=".json"
-              onChange={importProducts}
-              style={{ display: 'none' }}
-            />
-          </label>
-          <button
-            className="btn btn-outline btn-warning"
-            onClick={resetToDefaults}
-            title="Reset to default products"
-          >
-            ↺ Reset
-          </button>
+          {!isGuest && (
+            <>
+              <button
+                className="btn btn-success"
+                onClick={() => setShowAddProduct(!showAddProduct)}
+              >
+                + Add Product
+              </button>
+              <button
+                className="btn btn-outline"
+                onClick={exportProducts}
+                title="Download products as JSON file"
+              >
+                ↓ Export
+              </button>
+              <label
+                className="btn btn-outline"
+                title="Import products from JSON file"
+              >
+                ↑ Import
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={importProducts}
+                  style={{ display: 'none' }}
+                />
+              </label>
+              <button
+                className="btn btn-outline btn-warning"
+                onClick={resetToDefaults}
+                title="Reset to default products"
+              >
+                ↺ Reset
+              </button>
+            </>
+          )}
         </div>
 
         <div className="category-filters">
@@ -392,7 +473,7 @@ function App() {
           ))}
         </div>
 
-        {showAddProduct && (
+        {!isGuest && showAddProduct && (
           <div className="add-product-form">
             <input
               type="text"
@@ -449,10 +530,11 @@ function App() {
           favorites={favorites}
           toggleFavorite={toggleFavorite}
           addToCart={addToCart}
-          deleteProduct={deleteProduct}
-          editProduct={handleEditProduct}
+          deleteProduct={!isGuest ? deleteProduct : null}
+          editProduct={!isGuest ? handleEditProduct : null}
           cart={cart}
           selectedCategory={selectedCategory}
+          isGuest={isGuest}
         />
       </div>
 
