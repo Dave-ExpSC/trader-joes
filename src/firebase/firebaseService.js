@@ -4,11 +4,7 @@ import {
   setDoc,
   getDoc,
   onSnapshot,
-  serverTimestamp,
-  collection,
-  query,
-  where,
-  getDocs
+  serverTimestamp
 } from 'firebase/firestore';
 
 // Generate a random 8-character alphanumeric share code
