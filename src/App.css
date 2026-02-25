@@ -631,27 +631,49 @@ body {
     padding: 0.75rem;
   }
 
+  .product-card {
+    display: flex;
+    flex-direction: column;
+  }
+
   .product-card .card-body {
-    padding: 0.6rem;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
   }
 
   .product-name {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    margin-bottom: 0.2rem;
+    -webkit-line-clamp: 2;
   }
 
   .product-price {
-    font-size: 1rem;
-    margin-bottom: 0.4rem;
+    font-size: 0.95rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .card-actions {
+    gap: 0.35rem;
   }
 
   .favorite-btn {
-    width: 1.75rem;
-    height: 1.75rem;
-    font-size: 0.9rem;
+    width: 1.6rem;
+    height: 1.6rem;
+    font-size: 0.85rem;
   }
 
   .add-btn {
-    height: 1.75rem;
+    height: 1.6rem;
+    font-size: 0.65rem;
+  }
+
+  .category-badge {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6rem;
+  }
+
+  .category-badge .category-icon {
     font-size: 0.7rem;
   }
 }
