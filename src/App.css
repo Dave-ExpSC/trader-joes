@@ -597,6 +597,7 @@ body {
   overflow-y: auto;
   flex: 1;
   justify-content: center;
+  align-content: start;
 }
 
 /* New Product Card Styling */
