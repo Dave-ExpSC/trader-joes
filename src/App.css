@@ -1036,8 +1036,7 @@ body {
 
   .product-card .card-body {
     padding: 0.6rem;
-    flex: 1;
-    min-height: 0;
+    flex: none;
   }
 
   .category-badge {
@@ -1048,7 +1047,7 @@ body {
 
   .card-actions {
     gap: 0.4rem;
-    margin-top: auto;
+    margin-top: 0;
     flex-shrink: 0;
   }
 
@@ -1112,8 +1111,7 @@ body {
 
   .product-card .card-body {
     padding: 0.6rem;
-    flex: 1;
-    min-height: 0;
+    flex: none;
   }
 
   .category-badge {
@@ -1124,7 +1122,7 @@ body {
 
   .card-actions {
     gap: 0.4rem;
-    margin-top: auto;
+    margin-top: 0;
     flex-shrink: 0;
   }
 
