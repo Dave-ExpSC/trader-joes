@@ -1023,16 +1023,20 @@ body {
     font-size: 1rem;
     margin-bottom: 0.4rem;
     display: block !important;
+    color: #a33b3b !important;
+    flex-shrink: 0;
   }
 
   .product-name {
     font-size: 0.85rem;
     line-height: 1.2;
     margin-bottom: 0.4rem;
+    flex-shrink: 1;
   }
 
   .product-card .card-body {
     padding: 0.6rem;
+    flex: none;
   }
 
   .category-badge {
@@ -1043,7 +1047,7 @@ body {
 
   .card-actions {
     gap: 0.4rem;
-    margin-top: auto;
+    margin-top: 0;
     flex-shrink: 0;
   }
 
@@ -1094,16 +1098,20 @@ body {
     font-size: 1rem;
     margin-bottom: 0.4rem;
     display: block !important;
+    color: #a33b3b !important;
+    flex-shrink: 0;
   }
 
   .product-name {
     font-size: 0.85rem;
     line-height: 1.2;
     margin-bottom: 0.4rem;
+    flex-shrink: 1;
   }
 
   .product-card .card-body {
     padding: 0.6rem;
+    flex: none;
   }
 
   .category-badge {
@@ -1114,7 +1122,7 @@ body {
 
   .card-actions {
     gap: 0.4rem;
-    margin-top: auto;
+    margin-top: 0;
     flex-shrink: 0;
   }
 
