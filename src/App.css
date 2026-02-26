@@ -1023,16 +1023,21 @@ body {
     font-size: 1rem;
     margin-bottom: 0.4rem;
     display: block !important;
+    color: #a33b3b !important;
+    flex-shrink: 0;
   }
 
   .product-name {
     font-size: 0.85rem;
     line-height: 1.2;
     margin-bottom: 0.4rem;
+    flex-shrink: 1;
   }
 
   .product-card .card-body {
     padding: 0.6rem;
+    flex: 1;
+    min-height: 0;
   }
 
   .category-badge {
@@ -1094,16 +1099,21 @@ body {
     font-size: 1rem;
     margin-bottom: 0.4rem;
     display: block !important;
+    color: #a33b3b !important;
+    flex-shrink: 0;
   }
 
   .product-name {
     font-size: 0.85rem;
     line-height: 1.2;
     margin-bottom: 0.4rem;
+    flex-shrink: 1;
   }
 
   .product-card .card-body {
     padding: 0.6rem;
+    flex: 1;
+    min-height: 0;
   }
 
   .category-badge {
