@@ -1041,6 +1041,13 @@ body {
     flex: none;
   }
 
+  /* Critical: overflow:hidden on a grid item with align-self:start causes the
+     browser to compute min-content size as 0, collapsing grid rows to 0px.
+     The image container keeps its own overflow:hidden for image clipping. */
+  .product-card {
+    overflow: visible;
+  }
+
   .product-image-container {
     height: 130px;
   }
