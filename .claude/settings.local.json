@@ -10,7 +10,8 @@
       "Bash(git commit:*)",
       "Bash(git push)",
       "WebFetch(domain:www.traderjoes.com)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(git push -u origin claude/fix-mobile-price-display-SGFmU)"
     ]
   }
 }
