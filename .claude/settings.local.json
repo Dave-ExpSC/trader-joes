@@ -16,7 +16,12 @@
       "Bash(git pull origin master)",
       "Bash(git merge claude/fix-mobile-price-display-SGFmU)",
       "Bash(git push origin master)",
-      "Bash(git push origin claude/fix-mobile-price-display-SGFmU)"
+      "Bash(git push origin claude/fix-mobile-price-display-SGFmU)",
+      "Bash(git fetch origin master)",
+      "Bash(git rebase origin/master)",
+      "Bash(git push -f origin claude/fix-mobile-price-display-SGFmU)",
+      "Bash(git stash)",
+      "Bash(git stash pop)"
     ]
   }
 }
