@@ -39,7 +39,7 @@ function App() {
   // Flag to prevent save effects from firing when data comes in from Firebase
   const isFirebaseUpdate = React.useRef(false);
 
-  const categories = ['All', 'Produce', 'Pantry', 'Snacks', 'Frozen', 'Dairy'];
+  const categories = ['All', 'Produce', 'Fresh Prep', 'Pantry', 'Snacks', 'Frozen', 'Dairy'];
 
   // Load data when effectiveUserId changes
   useEffect(() => {
@@ -465,7 +465,7 @@ function App() {
           {categories.map(category => (
             <button
               key={category}
-              className={`category-chip ${selectedCategory === category ? 'active' : ''} category-${category.toLowerCase()}`}
+              className={`category-chip ${selectedCategory === category ? 'active' : ''} category-${category.toLowerCase().replace(/\s+/g, '-')}`}
               onClick={() => setSelectedCategory(category)}
             >
               {category}
@@ -506,6 +506,7 @@ function App() {
               <option>Pantry</option>
               <option>Snacks</option>
               <option>Produce</option>
+              <option>Fresh Prep</option>
               <option>Dairy</option>
             </select>
             <button

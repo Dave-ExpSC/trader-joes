@@ -536,6 +536,12 @@ body {
   color: #f57f17;
 }
 
+.category-chip.active.category-fresh-prep {
+  border-color: #00897b;
+  background: #e0f2f1;
+  color: #00695c;
+}
+
 /* Add Product Form */
 .add-product-form {
   background: white;
@@ -672,6 +678,11 @@ body {
 .category-badge.category-dairy {
   background: #fffde7;
   color: #f57f17;
+}
+
+.category-badge.category-fresh-prep {
+  background: #e0f2f1;
+  color: #00695c;
 }
 
 .edit-product-btn {

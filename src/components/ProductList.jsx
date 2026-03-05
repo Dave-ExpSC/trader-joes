@@ -11,6 +11,7 @@ function ProductList({ products, searchQuery, activeTab, favorites, toggleFavori
       'Pantry': '🥫',
       'Snacks': '🍿',
       'Produce': '🥬',
+      'Fresh Prep': '🥗',
       'Dairy': '🧀'
     };
     return icons[category] || '📦';
@@ -91,7 +92,7 @@ function ProductList({ products, searchQuery, activeTab, favorites, toggleFavori
                 ✕
               </button>
             )}
-            <div className={`category-badge category-${product.category.toLowerCase()}`}>
+            <div className={`category-badge category-${product.category.toLowerCase().replace(/\s+/g, '-')}`}>
               <span className="category-icon">{getCategoryIcon(product.category)}</span>
               {product.category}
             </div>
