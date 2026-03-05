@@ -620,7 +620,6 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-self: start;
 }
 
 .product-card:hover {
@@ -772,6 +771,7 @@ body {
   padding: 0.75rem;
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 .product-name {
@@ -798,6 +798,7 @@ body {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  margin-top: auto;
 }
 
 .favorite-btn {
