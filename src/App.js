@@ -536,6 +536,7 @@ function App() {
           cart={cart}
           selectedCategory={selectedCategory}
           isGuest={isGuest}
+          categories={categories}
         />
       </div>
 
