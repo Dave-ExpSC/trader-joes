@@ -1,6 +1,6 @@
 import React from 'react';
 
-function ProductList({ products, searchQuery, activeTab, favorites, toggleFavorite, addToCart, deleteProduct, editProduct, cart, selectedCategory }) {
+function ProductList({ products, searchQuery, activeTab, favorites, toggleFavorite, addToCart, deleteProduct, editProduct, cart, selectedCategory, categories }) {
   const isInCart = (productId) => {
     return cart.some(item => item.id === productId);
   };
@@ -38,8 +38,8 @@ function ProductList({ products, searchQuery, activeTab, favorites, toggleFavori
       );
     }
 
-    // Sort by category, then by name
-    const categoryOrder = ['Produce', 'Pantry', 'Snacks', 'Frozen', 'Dairy'];
+    // Sort by category order matching the top nav, then by name
+    const categoryOrder = (categories || []).filter(c => c !== 'All');
     filteredProducts.sort((a, b) => {
       const categoryDiff = categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category);
       if (categoryDiff !== 0) return categoryDiff;
