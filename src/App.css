@@ -617,9 +617,10 @@ body {
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   position: relative;
   transition: all 0.25s ease;
-  overflow: hidden;
+  overflow: clip;
   display: flex;
   flex-direction: column;
+  align-self: start;
 }
 
 .product-card:hover {
@@ -771,7 +772,6 @@ body {
   padding: 0.75rem;
   display: flex;
   flex-direction: column;
-  flex: 1;
 }
 
 .product-name {
@@ -798,7 +798,6 @@ body {
   display: flex;
   gap: 0.5rem;
   align-items: center;
-  margin-top: auto;
 }
 
 .favorite-btn {
@@ -1056,11 +1055,11 @@ body {
     flex: none;
   }
 
-  /* Critical: overflow:hidden on a grid item with align-self:start causes the
-     browser to compute min-content size as 0, collapsing grid rows to 0px.
-     The image container keeps its own overflow:hidden for image clipping. */
+  /* overflow:clip visually clips content (keeps rounded corners) without
+     creating a scroll container, so CSS Grid intrinsic size is computed
+     correctly and rows expand to fit cards with images. */
   .product-card {
-    overflow: visible;
+    overflow: clip;
   }
 
   .product-image-container {
