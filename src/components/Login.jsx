@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth } from '../firebase/config';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signInAnonymously, signOut } from 'firebase/auth';
 import { useAuth } from '../context/AuthContext';
 import { lookupShareCode } from '../firebase/firebaseService';
 
@@ -27,14 +27,36 @@ const Login = () => {
     if (!shareCode.trim()) return;
     setLoadingCode(true);
     setError('');
+    let anonUser = null;
     try {
+      // Firestore security rules require auth even for guest reads.
+      // Sign in anonymously so the lookup has a valid auth token, then
+      // immediately sign out — the guest session uses guestOwnerId, not Firebase auth.
+      try {
+        const cred = await signInAnonymously(auth);
+        anonUser = cred.user;
+      } catch (authErr) {
+        // Anonymous auth not enabled in Firebase; proceed and let Firestore
+        // return a meaningful error rather than a silent null.
+        console.warn('Anonymous auth unavailable:', authErr.code);
+      }
+
       const ownerId = await lookupShareCode(shareCode);
+
+      // Clean up the anonymous session before proceeding either way.
+      if (anonUser) {
+        await signOut(auth);
+      }
+
       if (ownerId) {
         loginAsGuest(ownerId);
       } else {
         setError('Invalid share code. Please check and try again.');
       }
     } catch (err) {
+      if (anonUser) {
+        try { await signOut(auth); } catch (_) {}
+      }
       setError('Error checking share code. Please try again.');
     }
     setLoadingCode(false);
