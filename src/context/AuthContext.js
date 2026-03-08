@@ -48,9 +48,7 @@ export const AuthProvider = ({ children }) => {
   // The effective user ID for Firebase reads/writes:
   // - Google user: their own UID
   // - Guest: the owner's UID (read-only from their perspective)
-  // Exclude anonymous Firebase users — they're only used transiently to
-  // authenticate the share-code lookup and should not bypass the Login screen.
-  const effectiveUserId = guestOwnerId || (user && !user.isAnonymous ? user.uid : null) || null;
+  const effectiveUserId = guestOwnerId || user?.uid || null;
   const isGuest = !!guestOwnerId && !user;
 
   return (

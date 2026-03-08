@@ -48,17 +48,12 @@ export const deleteShareCode = async (shareCode) => {
 
 // Look up owner userId from a share code
 export const lookupShareCode = async (shareCode) => {
-  try {
-    const normalized = shareCode.trim().toUpperCase();
-    const docSnap = await getDoc(doc(db, 'shareCodes', normalized));
-    if (docSnap.exists()) {
-      return docSnap.data().ownerId;
-    }
-    return null;
-  } catch (error) {
-    console.error('Error looking up share code:', error);
-    return null;
+  const normalized = shareCode.trim().toUpperCase();
+  const docSnap = await getDoc(doc(db, 'shareCodes', normalized));
+  if (docSnap.exists()) {
+    return docSnap.data().ownerId;
   }
+  return null;
 };
 
 // Save products to Firebase for a specific user
